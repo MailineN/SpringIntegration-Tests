@@ -1,6 +1,7 @@
-package fr.exp.integration.config;
+package fr.insee.springIntegration.experimental.config;
 
-import fr.exp.integration.model.Unit;
+
+import fr.insee.springIntegration.experimental.model.Unit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
@@ -24,8 +25,8 @@ public class integrationConfig {
         return new DirectChannel();
     }
 
-    @Bean
     // Transformer : Permet de transformer un objet en un autre
+    @Bean
     @Transformer(inputChannel = "integration.unit.gateway.channel", outputChannel = "integration.unit.objectToJson.channel")
     public ObjectToJsonTransformer objectToJsonTransformer(){
         return new ObjectToJsonTransformer(getMapper());

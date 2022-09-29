@@ -1,4 +1,4 @@
-package fr.exp.integration.model;
+package fr.insee.springIntegration.experimental.model;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -8,20 +8,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-public class Unit{
+public class Unit implements Serializable{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private static final long serialVersionUID = -7408851479146003262L;
+    private String id;
     private String nom;
     private String prenom;
     private String email;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
