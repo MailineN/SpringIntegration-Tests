@@ -36,4 +36,6 @@ public class IntegrationService {
         Message<?> newMessage = MessageBuilder.withPayload(unit.toString()).build();
         channel.send(newMessage);
     }
+
+
 }
