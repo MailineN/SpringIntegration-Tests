@@ -1,6 +1,7 @@
 package fr.insee.springIntegration.experimental.service;
 
 import fr.insee.springIntegration.experimental.model.Unit;
+import org.springframework.integration.annotation.IdempotentReceiver;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -14,6 +15,7 @@ public class IntegrationService {
     // Activator : Lier objet Spring à un canal (in/out)-> Permet de se comporter comme un service
     // Indique que le service est capable de traiter des messages "comme" des objets
     @ServiceActivator(inputChannel = "integration.unit.objectToJson.channel", outputChannel = "integration.unit.jsonToObject.channel")
+    @IdempotentReceiver("idempotentReceiverInterceptor")
     public Message<?> recieveMessage(Message<?> message) throws MessagingException {
         System.out.println(">>> Message recu : ");
         System.out.println("\t > "+ message);

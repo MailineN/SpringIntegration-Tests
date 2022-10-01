@@ -8,18 +8,19 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.Transformer;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
+import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.json.JsonToObjectTransformer;
 import org.springframework.integration.json.ObjectToJsonTransformer;
+import org.springframework.integration.selector.MetadataStoreSelector;
 import org.springframework.integration.support.json.Jackson2JsonObjectMapper;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableIntegration
 @IntegrationComponentScan
-public class integrationConfig {
+public class IntegrationConfig {
     @Bean
     public MessageChannel messageChannel(){
         return new DirectChannel();
@@ -45,5 +46,13 @@ public class integrationConfig {
         return new JsonToObjectTransformer(Unit.class);
     }
 
+    // Interceptor : Permet de gérer les doublons de messages
+    // Ici on filtre par l'id du message, par contre je ne sais pas comment tester
+    // MetadataStoreSelector : permet d
+    @Bean
+    public IdempotentReceiverInterceptor idempotentReceiverInterceptor() {
+        return new IdempotentReceiverInterceptor(new MetadataStoreSelector(m ->
+                m.getHeaders().get("id").toString()));
+    }
 
 }
