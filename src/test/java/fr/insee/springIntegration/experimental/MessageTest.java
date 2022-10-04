@@ -65,36 +65,64 @@ public class MessageTest {
 
     @Test
     public void messageHistoryTest() throws Exception {
-        final AbstractMessageChannel theMessageChannel;
-        final Message<String> theInputMessage;
-        final List<Message> theSubscriberReceivedMessages =
+        final AbstractMessageChannel messageChannel;
+        final Message<String> inputMessage;
+        final List<Message> subscriberReceivedMessages =
                 new CopyOnWriteArrayList<>();
 
 
-        theMessageChannel = new DirectChannel();
-        theMessageChannel.setComponentName("theMessageChannel");
-        theMessageChannel.setShouldTrack(true);
+        messageChannel = new DirectChannel();
+        messageChannel.setComponentName("messageChannel");
+        messageChannel.setShouldTrack(true);
 
-
-        final MessageHandler subscriber = theSubscriberReceivedMessages::add;
-        ((DirectChannel)theMessageChannel).subscribe(subscriber);
+        // Add suscriber
+        final MessageHandler subscriber = subscriberReceivedMessages::add;
+        ((DirectChannel)messageChannel).subscribe(subscriber);
 
         // send message
-        theInputMessage = MessageBuilder.withPayload("Hello World").build();
-        theMessageChannel.send(theInputMessage);
+        inputMessage = MessageBuilder.withPayload("Hello World").build();
+        messageChannel.send(inputMessage);
 
         await().atMost(2, TimeUnit.SECONDS).until(() ->
-                theSubscriberReceivedMessages.size() > 0);
+                subscriberReceivedMessages.size() > 0);
 
-        final Message<String> theFirstReceivedMessage = theSubscriberReceivedMessages.get(0);
+        final Message<String> theFirstReceivedMessage = subscriberReceivedMessages.get(0);
         final MessageHistory theFirstReceivedMessageHistory =
                 MessageHistory.read(theFirstReceivedMessage);
-        final Properties theMessageHistoryEntry = theFirstReceivedMessageHistory.get(0);
+        final Properties messageHistoryEntry = theFirstReceivedMessageHistory.get(0);
 
         logger.info("Message history object: " + theFirstReceivedMessageHistory);
-        logger.info("Message history entry: " + theMessageHistoryEntry);
+        logger.info("Message history entry: " + messageHistoryEntry);
 
         assertEquals("Message history entry should be for our message channel",
-                "theMessageChannel", theMessageHistoryEntry.getProperty("name"));
+                "messageChannel", messageHistoryEntry.getProperty("name"));
+    }
+
+    @Test
+    public void loggingTest() {
+        final AbstractMessageChannel messageChannel;
+        final Message<String> inputMessage;
+        final List<Message> subscriberReceivedMessages =
+                new CopyOnWriteArrayList<>();
+
+        /* Create the message channel. */
+        messageChannel = new DirectChannel();
+        messageChannel.setComponentName("messageChannel");
+
+        /* Enable logging for the message channel. */
+        messageChannel.setLoggingEnabled(true);
+
+
+        final MessageHandler subscriber = subscriberReceivedMessages::add;
+        ((DirectChannel)messageChannel).subscribe(subscriber);
+
+        inputMessage = MessageBuilder.withPayload("Hello World").build();
+        messageChannel.send(inputMessage);
+        messageChannel.send(inputMessage);
+
+        await().atMost(2, TimeUnit.SECONDS).until(() ->
+                subscriberReceivedMessages.size() >= 2);
+
+        /* No verification of the log output is made. */
     }
 }
