@@ -129,4 +129,52 @@ public class DummyInterceptor implements ChannelInterceptor {
                     MessageFormat.format(logMessage, logMessageParameters);
             logger.info(logMessage);
         }}
+
+    public AtomicInteger getmPreSendMessageCount() {
+        return mPreSendMessageCount;
+    }
+
+    public void setmPreSendMessageCount(AtomicInteger mPreSendMessageCount) {
+        this.mPreSendMessageCount = mPreSendMessageCount;
+    }
+
+    public AtomicInteger getmPostSendMessageCount() {
+        return mPostSendMessageCount;
+    }
+
+    public void setmPostSendMessageCount(AtomicInteger mPostSendMessageCount) {
+        this.mPostSendMessageCount = mPostSendMessageCount;
+    }
+
+    public AtomicInteger getmAfterSendCompletionMessageCount() {
+        return mAfterSendCompletionMessageCount;
+    }
+
+    public void setmAfterSendCompletionMessageCount(AtomicInteger mAfterSendCompletionMessageCount) {
+        this.mAfterSendCompletionMessageCount = mAfterSendCompletionMessageCount;
+    }
+
+    public AtomicInteger getmPreReceiveMessageCount() {
+        return mPreReceiveMessageCount;
+    }
+
+    public void setmPreReceiveMessageCount(AtomicInteger mPreReceiveMessageCount) {
+        this.mPreReceiveMessageCount = mPreReceiveMessageCount;
+    }
+
+    public AtomicInteger getmPostReceiveMessageCount() {
+        return mPostReceiveMessageCount;
+    }
+
+    public void setmPostReceiveMessageCount(AtomicInteger mPostReceiveMessageCount) {
+        this.mPostReceiveMessageCount = mPostReceiveMessageCount;
+    }
+
+    public AtomicInteger getmAfterReceiveCompletionMessageCount() {
+        return mAfterReceiveCompletionMessageCount;
+    }
+
+    public void setmAfterReceiveCompletionMessageCount(AtomicInteger mAfterReceiveCompletionMessageCount) {
+        this.mAfterReceiveCompletionMessageCount = mAfterReceiveCompletionMessageCount;
+    }
 }
