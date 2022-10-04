@@ -1,31 +1,34 @@
 package fr.insee.springIntegration.experimental;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.insee.springIntegration.experimental.config.IntegrationConfig;
 import fr.insee.springIntegration.experimental.model.Unit;
 import static org.junit.Assert.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-import fr.insee.springIntegration.experimental.service.IntegrationService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.integration.json.ObjectToJsonTransformer;
+import org.springframework.integration.channel.AbstractMessageChannel;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.history.MessageHistory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class MessageTest {
-    @Autowired
-    @Qualifier("integration.unit.objectToJson.channel")
-    private MessageChannel someInputChannel;
 
+    private Logger logger = LogManager.getLogger(MessageTest.class);
     @Autowired
     IntegrationConfig integrationConfig;
 
@@ -61,20 +64,37 @@ public class MessageTest {
     }
 
     @Test
-    public void testSendMessage() {
-        Unit unit = new Unit();
-        unit.setEmail("dschrir0@europa.eu");
-        unit.setNom("Schrir");
-        unit.setPrenom("Dorise");
-        unit.setId("1");
+    public void messageHistoryTest() throws Exception {
+        final AbstractMessageChannel theMessageChannel;
+        final Message<String> theInputMessage;
+        final List<Message> theSubscriberReceivedMessages =
+                new CopyOnWriteArrayList<>();
 
-        // Build a message
-        Message<?> message1 = MessageBuilder.withPayload(unit).build();
 
-        ObjectToJsonTransformer transformer = new ObjectToJsonTransformer(integrationConfig.getMapper());
+        theMessageChannel = new DirectChannel();
+        theMessageChannel.setComponentName("theMessageChannel");
+        theMessageChannel.setShouldTrack(true);
 
-        this.someInputChannel.send(new GenericMessage<>(transformer.transform(message1)));
-        // Ad Channel Interceptor to check if the message is sent
 
+        final MessageHandler subscriber = theSubscriberReceivedMessages::add;
+        ((DirectChannel)theMessageChannel).subscribe(subscriber);
+
+        // send message
+        theInputMessage = MessageBuilder.withPayload("Hello World").build();
+        theMessageChannel.send(theInputMessage);
+
+        await().atMost(2, TimeUnit.SECONDS).until(() ->
+                theSubscriberReceivedMessages.size() > 0);
+
+        final Message<String> theFirstReceivedMessage = theSubscriberReceivedMessages.get(0);
+        final MessageHistory theFirstReceivedMessageHistory =
+                MessageHistory.read(theFirstReceivedMessage);
+        final Properties theMessageHistoryEntry = theFirstReceivedMessageHistory.get(0);
+
+        logger.info("Message history object: " + theFirstReceivedMessageHistory);
+        logger.info("Message history entry: " + theMessageHistoryEntry);
+
+        assertEquals("Message history entry should be for our message channel",
+                "theMessageChannel", theMessageHistoryEntry.getProperty("name"));
     }
 }
