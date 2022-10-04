@@ -16,7 +16,7 @@ public class IntegrationService {
     // Indique que le service est capable de traiter des messages "comme" des objets
     @ServiceActivator(inputChannel = "integration.unit.objectToJson.channel", outputChannel = "integration.unit.jsonToObject.channel")
     @IdempotentReceiver("idempotentReceiverInterceptor")
-    public Message<?> recieveMessage(Message<?> message) throws MessagingException {
+    public Message<?> receiveMessage(Message<?> message) throws MessagingException {
         System.out.println(">>> Message recu : ");
         System.out.println("\t > "+ message);
         System.out.println(">>> Object to JSON : " + message.getPayload());
@@ -35,6 +35,11 @@ public class IntegrationService {
         Unit unit = (Unit) message.getPayload();
         Message<?> newMessage = MessageBuilder.withPayload(unit.toString()).build();
         channel.send(newMessage);
+    }
+
+    @ServiceActivator(outputChannel = "integration.unit.objectToJson.channel")
+    public Message<?> dummyMessageSender(Message<?> message) {
+        return message;
     }
 
 

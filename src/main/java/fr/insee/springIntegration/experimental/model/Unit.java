@@ -16,6 +16,12 @@ public class Unit implements Serializable{
     private String prenom;
     private String email;
 
+    public Unit() {
+    }
+
+    public Unit(Unit u) {
+    }
+
     public String getId() {
         return id;
     }

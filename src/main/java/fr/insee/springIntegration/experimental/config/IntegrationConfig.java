@@ -1,6 +1,5 @@
 package fr.insee.springIntegration.experimental.config;
 
-
 import fr.insee.springIntegration.experimental.model.Unit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +15,7 @@ import org.springframework.integration.support.json.Jackson2JsonObjectMapper;
 import org.springframework.messaging.MessageChannel;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @Configuration
 @EnableIntegration
@@ -54,5 +54,7 @@ public class IntegrationConfig {
         return new IdempotentReceiverInterceptor(new MetadataStoreSelector(m ->
                 m.getHeaders().get("id").toString()));
     }
+
+
 
 }

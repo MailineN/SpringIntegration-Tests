@@ -1,5 +1,6 @@
 package fr.insee.springIntegration.experimental.gateway;
 
+import fr.insee.springIntegration.experimental.model.SurveyUnit;
 import fr.insee.springIntegration.experimental.model.Unit;
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
