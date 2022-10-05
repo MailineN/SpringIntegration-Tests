@@ -35,10 +35,6 @@ public class IdempotentReceiverTest {
     public void testIdempotentReceiver() {
 
         ConcurrentMetadataStore store = new SimpleMetadataStore();
-        final AbstractMessageChannel messageChannel;
-        final AbstractMessageChannel discardChannel;
-        final List<Message> subscriberReceivedMessages = new CopyOnWriteArrayList<>();
-        final List<Message> subscriberDiscardMessages = new CopyOnWriteArrayList<>();
         AtomicReference<Message<?>> handled = new AtomicReference<>();
         // Je ne sais pas pourquoi on a besoin de ça, mais sans ça fait une erreur
         BeanFactory beanFactory = Mockito.mock(BeanFactory.class);
@@ -60,32 +56,26 @@ public class IdempotentReceiverTest {
                 new IdempotentReceiverInterceptor(new MetadataStoreSelector(idempotentKeyStrategy, store));
         idempotentReceiverInterceptor.setThrowExceptionOnRejection(true);
 
-        // Create message & dicard Channel
-        messageChannel = new DirectChannel();
-        messageChannel.setComponentName("messageIdempotentReceiverChannel");
-
+        // Link idempotent receiver interceptor to the message handler
         MessageHandler idempotentReceiver = handled::set;
         ProxyFactory proxyFactory = new ProxyFactory(idempotentReceiver);
         proxyFactory.addAdvice(idempotentReceiverInterceptor);
 
         idempotentReceiver = (MessageHandler) proxyFactory.getProxy();
 
-        // Create subscriber
-        final MessageHandler subscriber = subscriberReceivedMessages::add;
-        ((DirectChannel) messageChannel).subscribe(subscriber);
-
         // Build 2 messages with same payload
-        Message<Unit> message1 = MessageBuilder.withPayload(unit).build();
-        Message<Unit> message2 = MessageBuilder.withPayload(unit).build();
+        Message<String> message1 = MessageBuilder.withPayload(unit.toString()).build();
+        Message<String> message2 = MessageBuilder.withPayload(unit.toString()).build();
         assertEquals(message1.getPayload(), message2.getPayload());
 
         // Send messages to messageIdempotentReceiverChannel
-        idempotentReceiver.handleMessage(new GenericMessage<>("foo"));
-        assertNotNull(store.get("foo"));
+        idempotentReceiver.handleMessage(new GenericMessage<>("test"));
+        assertNotNull(store.get("test"));
 
-
+        // Test with the two messages
+        idempotentReceiver.handleMessage(message1);
         try {
-            idempotentReceiver.handleMessage(new GenericMessage<>("foo"));
+            idempotentReceiver.handleMessage(message2);
             fail("MessageRejectedException expected");
         }
         catch (Exception e) {
