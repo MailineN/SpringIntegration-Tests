@@ -36,30 +36,29 @@ public class InterceptorTest {
                 .getAsInt();
 
         final AbstractMessageChannel messageChannel;
-        final Message<String> inputMessage;
         final DummyInterceptor dummyInterceptor;
-
         final List<Message> subscriberReceivedMessages = new CopyOnWriteArrayList<>();
 
+        // Create the message channel.
         messageChannel = new DirectChannel();
-        messageChannel.setComponentName("messageChannel");
-        messageChannel.setShouldTrack(true);
+        messageChannel.setComponentName("messageChannelName");
 
-        // Create a dummy interceptor and add it to the channel
+        // Create a channel interceptor and add it to the interceptors of the message channel.
         dummyInterceptor = new DummyInterceptor();
         messageChannel.addInterceptor(dummyInterceptor);
+
+
 
         final MessageHandler subscriber = subscriberReceivedMessages::add;
         ((DirectChannel)messageChannel).subscribe(subscriber);
 
-        inputMessage = MessageBuilder.withPayload("Hello World").build();
         for (int i = 0; i < nvMessages; i++) {
-            messageChannel.send(inputMessage);
+            Message<String> message = MessageBuilder.withPayload("Message no" + i).build();
+            messageChannel.send(message);
         }
 
-
-        await().atMost(2, TimeUnit.SECONDS).until(() ->
-                subscriberReceivedMessages.size() >= 1);
+        await().atMost(5, TimeUnit.SECONDS).until(() ->
+                subscriberReceivedMessages.size() >= nvMessages);
 
         assertEquals(
                 "PreSend :",
@@ -69,6 +68,11 @@ public class InterceptorTest {
                 "AfterSendCompletion : ",
                 nvMessages,
                 dummyInterceptor.getmAfterSendCompletionMessageCount().intValue());
+
+        assertEquals(
+                "Number of messages : ",
+                nvMessages,
+                subscriberReceivedMessages.size());
 
     }
 }

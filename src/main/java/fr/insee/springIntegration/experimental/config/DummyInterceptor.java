@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DummyInterceptor implements ChannelInterceptor {
     // Interceptor : Intercepte les messages à plusieurs étapes de l'envoi ou de la reception, peut modifier ou stopper l'envoi
-
+    // Logger + Counter interceptor
     private Logger logger = LogManager.getLogger(DummyInterceptor.class);
 
     private AtomicInteger mPreSendMessageCount = new AtomicInteger();
@@ -27,7 +27,7 @@ public class DummyInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(final Message<?> inMessage,
                               final MessageChannel inChannel) {
-        logMessageWithChannelAndPayload("Avant l'envoi de messages",
+        logMessageWithChannelAndPayload("Pre Send : ",
                 inMessage,
                 inChannel,
                 (Object[]) null);
@@ -38,7 +38,7 @@ public class DummyInterceptor implements ChannelInterceptor {
     @Override
     public void postSend(final Message<?> inMessage, final MessageChannel inChannel,
                          final boolean inSent) {
-        logMessageWithChannelAndPayload("Après l'envoi de message",
+        logMessageWithChannelAndPayload("Post Send : ",
                 inMessage,
                 inChannel,
                 (Object[]) null);
@@ -51,7 +51,7 @@ public class DummyInterceptor implements ChannelInterceptor {
                                     final boolean inSent,
                                     final Exception inException) {
         logMessageWithChannelAndPayload(
-                "Après complétion de l'envoi.",
+                "Post SendCompletion : ",
                 inMessage,
                 inChannel,
                 inException);
@@ -61,7 +61,7 @@ public class DummyInterceptor implements ChannelInterceptor {
     @Override
     public boolean preReceive(final MessageChannel inChannel) {
         /* Only applies to pollable channels. */
-        logMessageWithChannelAndPayload("Avant Réception.",
+        logMessageWithChannelAndPayload("Pre Receive : ",
                 null,
                 inChannel,
                 (Object[]) null);
@@ -75,7 +75,7 @@ public class DummyInterceptor implements ChannelInterceptor {
     public Message<?> postReceive(final Message<?> inMessage,
                                   final MessageChannel inChannel) {
         /* Only applies to pollable channels. */
-        logMessageWithChannelAndPayload("Après réception.",
+        logMessageWithChannelAndPayload("Post Receive : ",
                 null,
                 inChannel,
                 (Object[]) null);

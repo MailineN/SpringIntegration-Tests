@@ -48,11 +48,14 @@ public class IntegrationConfig {
 
     // Interceptor : Permet de gérer les doublons de messages
     // Ici on filtre par l'id du message, par contre je ne sais pas comment tester
-    // MetadataStoreSelector : permet d
+    // MetadataStoreSelector : permet de selec le composant à filtrer
     @Bean
     public IdempotentReceiverInterceptor idempotentReceiverInterceptor() {
-        return new IdempotentReceiverInterceptor(new MetadataStoreSelector(m ->
-                m.getHeaders().get("id").toString()));
+        IdempotentReceiverInterceptor idempotentReceiverInterceptor =
+                new IdempotentReceiverInterceptor(new MetadataStoreSelector(m -> m.getPayload().toString()));
+        idempotentReceiverInterceptor.setDiscardChannelName("integration.idempotentDiscardChannel");
+        idempotentReceiverInterceptor.setThrowExceptionOnRejection(true);
+        return idempotentReceiverInterceptor;
     }
 
 
