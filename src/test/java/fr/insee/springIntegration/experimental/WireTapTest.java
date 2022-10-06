@@ -39,6 +39,30 @@ public class WireTapTest {
         assertNotNull(intercepted);
         assertEquals(original, intercepted);
 
+    }
+
+    @Test
+    public void WireTapInterceptorHeaderTest(){
+        QueueChannel messageChannel = new QueueChannel();
+        QueueChannel wireTapChannel = new QueueChannel();
+        messageChannel.addInterceptor(new WireTap(wireTapChannel));
+
+
+        // Create a message and send it to the message channel.
+        Unit unit = new Unit();
+        unit.setEmail("dschrir0@europa.eu");
+        unit.setNom("Schrir");
+        unit.setPrenom("Dorise");
+        unit.setId("1");
+
+        Message<String> message = MessageBuilder.withPayload(unit.toString()).setHeader("testHeader","idkWhatToWriteHere").build();
+
+        messageChannel.send(message);
+
+        String original = messageChannel.receive(0).getHeaders().get("testHeader").toString();
+        String intercepted = wireTapChannel.receive(0).getHeaders().get("testHeader").toString();
+        assertNotNull(intercepted);
+        assertEquals(original, intercepted);
 
     }
 }
