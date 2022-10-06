@@ -10,8 +10,10 @@ import static org.junit.Assert.*;
 
 import org.springframework.integration.MessageRejectedException;
 import org.springframework.integration.channel.AbstractMessageChannel;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
@@ -66,4 +68,32 @@ public class DataConversionTest {
         assertThat(outputMessage.getPayload()).isInstanceOf(Unit.class);
 
     }
+
+    @Test
+    public void wrongTypeTest() {
+        final AbstractMessageChannel messageChannel;
+        final List<Message> subscriberReceivedMessages =
+                new CopyOnWriteArrayList<>();
+        final Message message;
+
+        message = MessageBuilder.withPayload("test").build();
+
+        // Create the message channel.
+        messageChannel = new DirectChannel();
+        messageChannel.setComponentName("messageChannel");
+        messageChannel.setDatatypes(int.class);
+
+
+        final MessageHandler subscriber = subscriberReceivedMessages::add;
+        ((DirectChannel) messageChannel).subscribe(subscriber);
+
+        try {
+            messageChannel.send(message);
+            fail("An exception should be thrown");
+        } catch (final Exception e) {
+            logger.info("Exeption thrown: " + e);
+            assertThat(e).isInstanceOf(MessageDeliveryException.class);
+        }
+    }
+
 }

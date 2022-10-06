@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
@@ -35,12 +36,12 @@ public class InterceptorTest {
                 .findFirst()
                 .getAsInt();
 
-        final AbstractMessageChannel messageChannel;
+
         final DummyInterceptor dummyInterceptor;
         final List<Message> subscriberReceivedMessages = new CopyOnWriteArrayList<>();
 
         // Create the message channel.
-        messageChannel = new DirectChannel();
+        QueueChannel messageChannel = new QueueChannel();
         messageChannel.setComponentName("messageChannelName");
 
         // Create a channel interceptor and add it to the interceptors of the message channel.
@@ -49,30 +50,29 @@ public class InterceptorTest {
 
 
 
-        final MessageHandler subscriber = subscriberReceivedMessages::add;
-        ((DirectChannel)messageChannel).subscribe(subscriber);
-
         for (int i = 0; i < nvMessages; i++) {
             Message<String> message = MessageBuilder.withPayload("Message no" + i).build();
             messageChannel.send(message);
         }
+        Message<?> originalMessage = messageChannel.receive(0);
 
-        await().atMost(5, TimeUnit.SECONDS).until(() ->
-                subscriberReceivedMessages.size() >= nvMessages);
+        await().atMost(25, TimeUnit.SECONDS);
 
         assertEquals(
                 "PreSend :",
                 nvMessages,
-                dummyInterceptor.getmPreSendMessageCount().intValue());
+                dummyInterceptor.getpreSendMessageCount().intValue());
         assertEquals(
                 "AfterSendCompletion : ",
                 nvMessages,
-                dummyInterceptor.getmAfterSendCompletionMessageCount().intValue());
+                dummyInterceptor.getafterSendCompletionMessageCount().intValue());
 
         assertEquals(
-                "Number of messages : ",
-                nvMessages,
-                subscriberReceivedMessages.size());
+                "AfterSendCompletion : ",
+                1,
+                dummyInterceptor.getpreReceiveMessageCount().intValue());
+
+
 
     }
 }

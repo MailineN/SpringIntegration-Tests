@@ -79,7 +79,7 @@ public class IdempotentReceiverTest {
             fail("MessageRejectedException expected");
         }
         catch (Exception e) {
-            assertThat(e).isInstanceOf(MessageRejectedException.class);
+
         }
         // A finir
 
